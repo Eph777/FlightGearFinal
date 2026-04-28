@@ -49,7 +49,7 @@ print_success "Système mis à jour !"
 
 # Étape 2 : Dépendances
 print_info "Étape 2/6 : Installation des dépendances..."
-sudo apt install -y git cmake build-essential postgresql python3-pip python3-venv ufw curl
+sudo apt install -y git cmake build-essential postgresql postgresql-contrib postgis python3-pip python3-venv ufw curl
 cd "$INSTALL_DIR"
 python3 -m venv venv
 source venv/bin/activate
@@ -136,6 +136,14 @@ sudo -u postgres psql -d $DB_NAME -c "CREATE TABLE IF NOT EXISTS aircraft_positi
 );"
 sudo -u postgres psql -d $DB_NAME -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $DB_USER;"
 sudo -u postgres psql -d $DB_NAME -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO $DB_USER;"
+
+sudo -u postgres psql -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+sudo -u postgres psql -d $DB_NAME -c "CREATE OR REPLACE VIEW view_live_positions AS
+SELECT 
+    id, callsign, latitude, longitude, heading, updated_at,
+    ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
+FROM aircraft_position;"
+sudo -u postgres psql -d $DB_NAME -c "ALTER VIEW view_live_positions OWNER TO $DB_USER;"
 
 print_success "PostgreSQL configuré !"
 

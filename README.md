@@ -46,3 +46,9 @@ sudo systemctl status fgms
 # Check tracker status
 sudo systemctl status fgms-tracker
 ```
+
+### View in QGIS
+1. Open QGIS.
+2. Go to **Layer** → **Add Layer** → **Add PostGIS Layers...**
+3. Create a new connection to your PostgreSQL database (`flightgear` database, user `fguser`).
+4. Select the `view_live_positions` view and add it to your map. It will automatically update with aircraft positions.
