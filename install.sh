@@ -49,7 +49,7 @@ print_success "Système mis à jour !"
 
 # Étape 2 : Dépendances
 print_info "Étape 2/6 : Installation des dépendances..."
-sudo apt install -y git cmake build-essential postgresql python3-pip ufw curl 
+sudo apt install -y git cmake build-essential postgresql python3-pip python3-venv ufw curl
 cd "$INSTALL_DIR"
 python3 -m venv venv
 source venv/bin/activate
