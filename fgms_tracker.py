@@ -5,8 +5,7 @@ import math
 import os
 from dotenv import load_dotenv
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(BASE_DIR, "config", ".env"))
+load_dotenv("/root/flightgear/config/.env") 
 
 DB_NAME = os.getenv("DB_NAME", "flightgear")
 DB_USER = os.getenv("DB_USER", "fguser")
@@ -17,7 +16,7 @@ def get_positions():
     s = socket.socket()
     s.connect(('127.0.0.1', 5001))
     s.send(b'list\r\n')
-    time.sleep(0.2)
+    time.s
     data = s.recv(16384).decode()
     s.close()
     players = []
@@ -57,4 +56,3 @@ while True:
             conn.rollback()
         except:
             conn = connect_db()
-    time.sleep(2)
