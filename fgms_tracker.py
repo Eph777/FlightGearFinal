@@ -3,6 +3,9 @@ import time
 import psycopg2
 import math
 import os
+from dotenv import load_dotenv
+
+load_dotenv("/root/flightgear/config/.env") 
 
 DB_NAME = os.getenv("DB_NAME", "flightgear")
 DB_USER = os.getenv("DB_USER", "fguser")
