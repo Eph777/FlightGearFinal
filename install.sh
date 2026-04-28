@@ -16,7 +16,7 @@ print_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 print_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # Config
-INSTALL_DIR="/root/flightgear"
+INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CURRENT_USER=$(whoami)
 FGMS_PORT=5000
 FGMS_TELNET_PORT=5001
@@ -50,10 +50,9 @@ print_success "Système mis à jour !"
 # Étape 2 : Dépendances
 print_info "Étape 2/6 : Installation des dépendances..."
 sudo apt install -y git cmake build-essential postgresql python3-pip ufw curl 
-python3 -m venv venv
-source ./venv/bin/activate
-pip install --upgrade pip
-pip install --upgrade -r requirements.txt
+python3 -m venv "$INSTALL_DIR/venv"
+"$INSTALL_DIR/venv/bin/pip" install --upgrade pip
+"$INSTALL_DIR/venv/bin/pip" install --upgrade -r "$INSTALL_DIR/requirements.txt"
 
 
 print_success "Dépendances installées !"
@@ -179,7 +178,7 @@ After=network.target postgresql.service fgms.service
 Type=simple
 User=$CURRENT_USER
 EnvironmentFile=$INSTALL_DIR/config/.env
-ExecStart=/usr/bin/python3 $INSTALL_DIR/fgms_tracker.py
+ExecStart=$INSTALL_DIR/venv/bin/python3 $INSTALL_DIR/fgms_tracker.py
 Restart=always
 RestartSec=5
 
@@ -212,7 +211,7 @@ echo "  # Terminal 1 - Lancer FGMS :"
 echo "  fgms -p $FGMS_PORT -a $FGMS_TELNET_PORT -d"
 echo ""
 echo "  # Terminal 2 - Lancer le tracker :"
-echo "  source $INSTALL_DIR/config/.env && python3 ~/FlightGearTest/fgms_tracker.py"
+echo "  source $INSTALL_DIR/config/.env && $INSTALL_DIR/venv/bin/python3 $INSTALL_DIR/fgms_tracker.py"
 echo ""
 print_info "Connexion FlightGear :"
 echo "  Serveur : $(hostname -I | awk '{print $1}') port $FGMS_PORT"

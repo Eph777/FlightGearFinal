@@ -9,7 +9,7 @@ NC='\033[0m'
 print_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
 
-INSTALL_DIR="/root/flightgear"
+INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo ""
 print_info "=== Configuration de la base de données ==="

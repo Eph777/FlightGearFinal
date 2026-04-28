@@ -1,37 +1,48 @@
-# FlightGearFinal
-Track player positions from a FlightGear multiplayer server in real time and visualize them on a live map inside QGIS.
+# FlightGear Multiplayer Tracker
+
+Track player positions from a FlightGear multiplayer server in real-time and visualize them on a live map inside QGIS.
 
 ## Architecture
-[FlightGear Clients] → [FGMS Server] → [fgms_tracker.py] → [PostgreSQL] → [QGIS]
+`[FlightGear Clients] → [FGMS Server] → [fgms_tracker.py] → [PostgreSQL] → [QGIS]`
 
 ## Requirements
 - Ubuntu 20.04+ or Debian 11+
 - 2 GB RAM minimum
-- Root or sudo access
+- A non-root user with `sudo` privileges
 
-## Installation
+## Deployment on Ubuntu
+
+Follow these simple steps to install everything in one go. You can run this anywhere (e.g., in your home directory).
+
 ```bash
-
-#1. Clone the repo : 
+# 1. Clone the repository
 git clone https://github.com/AnthonyRaza/FlightGearFinal.git
-cd FlightGearTest
+cd FlightGearFinal
 
-# 2. Run the install script
+# 2. Run the installation script
 bash install.sh
+```
 
-## Connect FlightGear
-In FlightGear launcher → Multiplayer → Custom server :
-Server : <your-server-ip>
-Port   : 5000
+During the installation:
+- It will ask you for database credentials (you can press Enter to use the defaults).
+- It will automatically install `fgms`, PostgreSQL, and all Python dependencies in a safe virtual environment.
+- It will configure and start `systemd` services for both the game server (`fgms`) and the position tracker (`fgms-tracker`).
 
-## Run The fgms_tracker 
-python3 fgms_tracker.py
-  
+## How to use
 
+The services run automatically in the background. You do not need to start anything manually.
 
+### Connect FlightGear
+In the FlightGear launcher, go to **Multiplayer** → **Custom server**:
+- **Server:** `<your-ubuntu-server-ip>`
+- **Port:** `5000`
 
+### Check Services (Optional)
+If you need to view the logs or check the status:
+```bash
+# Check FlightGear server status
+sudo systemctl status fgms
 
-
-
-
-
+# Check tracker status
+sudo systemctl status fgms-tracker
+```

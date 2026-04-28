@@ -5,7 +5,8 @@ import math
 import os
 from dotenv import load_dotenv
 
-load_dotenv("/root/flightgear/config/.env") 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, "config", ".env"))
 
 DB_NAME = os.getenv("DB_NAME", "flightgear")
 DB_USER = os.getenv("DB_USER", "fguser")
