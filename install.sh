@@ -50,8 +50,12 @@ print_success "Système mis à jour !"
 # Étape 2 : Dépendances
 print_info "Étape 2/6 : Installation des dépendances..."
 sudo apt install -y git cmake build-essential postgresql python3-pip ufw curl 
-pip3 install psycopg2-binary --break-system-packages
-pip3 install dotenv
+python3 -m venv venv
+source ./venv/bin/activate
+pip install --upgrade pip
+pip install --upgrade -r requirements.txt
+
+
 print_success "Dépendances installées !"
 
 # Étape 3 : Compilation FGMS
