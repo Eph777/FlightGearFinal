@@ -91,6 +91,7 @@ print_info "Étape 4/6 : Configuration PostgreSQL..."
 
 sudo service postgresql start 2>/dev/null || sudo systemctl start postgresql 2>/dev/null || true
 
+pushd /tmp >/dev/null
 PG_HBA=$(sudo -u postgres psql -t -P format=unaligned -c 'SHOW hba_file;' 2>/dev/null)
 PG_CONF=$(sudo -u postgres psql -t -P format=unaligned -c 'SHOW config_file;' 2>/dev/null)
 
@@ -103,8 +104,11 @@ else
     echo "listen_addresses = '*'" | sudo tee -a "$PG_CONF"
 fi
 
+# Replace peer auth with scram-sha-256 for local socket connections to prevent "Peer authentication failed"
+sudo sed -i 's/^local\s\+all\s\+all\s\+\(peer\|md5\).*/local   all             all                                     scram-sha-256/' "$PG_HBA"
+
 if ! sudo grep -q "host    $DB_NAME" "$PG_HBA" 2>/dev/null; then
-    echo "host    $DB_NAME    $DB_USER    0.0.0.0/0    md5" | sudo tee -a "$PG_HBA"
+    echo "host    $DB_NAME    $DB_USER    0.0.0.0/0    scram-sha-256" | sudo tee -a "$PG_HBA"
 else
     print_warning "Règle pg_hba déjà présente, on passe..."
 fi
@@ -121,7 +125,7 @@ fi
 if sudo -u postgres psql -c "\du" 2>/dev/null | grep -q "$DB_USER"; then
     print_warning "User $DB_USER existe déjà, on passe..."
 else
-    sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
+    sudo -u postgres psql -c "SET password_encryption = 'scram-sha-256'; CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
     print_success "User $DB_USER créé !"
 fi
 
@@ -144,6 +148,7 @@ SELECT
     ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
 FROM aircraft_position;"
 sudo -u postgres psql -d $DB_NAME -c "ALTER VIEW view_live_positions OWNER TO $DB_USER;"
+popd >/dev/null
 
 print_success "PostgreSQL configuré !"
 
