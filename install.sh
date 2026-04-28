@@ -50,9 +50,11 @@ print_success "Système mis à jour !"
 # Étape 2 : Dépendances
 print_info "Étape 2/6 : Installation des dépendances..."
 sudo apt install -y git cmake build-essential postgresql python3-pip ufw curl 
-python3 -m venv "$INSTALL_DIR/venv"
-"$INSTALL_DIR/venv/bin/pip" install --upgrade pip
-"$INSTALL_DIR/venv/bin/pip" install --upgrade -r "$INSTALL_DIR/requirements.txt"
+cd "$INSTALL_DIR"
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 
 
 print_success "Dépendances installées !"
@@ -177,6 +179,8 @@ After=network.target postgresql.service fgms.service
 [Service]
 Type=simple
 User=$CURRENT_USER
+WorkingDirectory=$INSTALL_DIR
+Environment="PATH=$INSTALL_DIR/venv/bin"
 EnvironmentFile=$INSTALL_DIR/config/.env
 ExecStart=$INSTALL_DIR/venv/bin/python3 $INSTALL_DIR/fgms_tracker.py
 Restart=always
