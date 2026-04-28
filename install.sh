@@ -1,5 +1,5 @@
 #!/bin/bash
-# FlightGear Multiplayer Tracker - Installation Script
+# FlightGear Multiplayer Tracker - Executable Installation Script 
 
 set -e
 
