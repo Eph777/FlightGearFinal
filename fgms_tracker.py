@@ -5,19 +5,18 @@ import math
 import os
 from dotenv import load_dotenv
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(BASE_DIR, "config", ".env"))
+load_dotenv("/root/flightgear/config/.env") 
 
 DB_NAME = os.getenv("DB_NAME", "flightgear")
 DB_USER = os.getenv("DB_USER", "fguser")
 DB_PASS = os.getenv("DB_PASS", "fgpassword123")
 DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
 
 def get_positions():
     s = socket.socket()
     s.connect(('127.0.0.1', 5001))
     s.send(b'list\r\n')
+    time.s
     data = s.recv(16384).decode()
     s.close()
     players = []
@@ -32,7 +31,7 @@ def get_positions():
     return players
 
 def connect_db():
-    return psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST, port=DB_PORT)
+    return psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
 
 conn = connect_db()
 print("Tracker démarré !")
