@@ -49,8 +49,9 @@ print_success "Système mis à jour !"
 
 # Étape 2 : Dépendances
 print_info "Étape 2/6 : Installation des dépendances..."
-sudo apt install -y git cmake build-essential postgresql python3-pip ufw curl
+sudo apt install -y git cmake build-essential postgresql python3-pip ufw curl 
 pip3 install psycopg2-binary --break-system-packages
+pip3 install dotenv
 print_success "Dépendances installées !"
 
 # Étape 3 : Compilation FGMS
