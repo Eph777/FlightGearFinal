@@ -103,6 +103,12 @@ else
     echo "listen_addresses = '*'" | sudo tee -a "$PG_CONF"
 fi
 
+if sudo grep -q "^port = " "$PG_CONF" 2>/dev/null; then
+    sudo sed -i "s/^port = .*/port = $DB_PORT/" "$PG_CONF"
+else
+    echo "port = $DB_PORT" | sudo tee -a "$PG_CONF"
+fi
+
 if ! sudo grep -q "host    $DB_NAME" "$PG_HBA" 2>/dev/null; then
     echo "host    $DB_NAME    $DB_USER    0.0.0.0/0    md5" | sudo tee -a "$PG_HBA"
 else
@@ -111,22 +117,22 @@ fi
 
 sudo service postgresql restart 2>/dev/null || sudo systemctl restart postgresql 2>/dev/null || true
 
-if sudo -u postgres psql -lqt 2>/dev/null | grep -q "$DB_NAME"; then
+if sudo -u postgres psql -p $DB_PORT -lqt 2>/dev/null | grep -q "$DB_NAME"; then
     print_warning "Base $DB_NAME existe déjà, on passe..."
 else
-    sudo -u postgres psql -c "CREATE DATABASE $DB_NAME;"
+    sudo -u postgres psql -p $DB_PORT -c "CREATE DATABASE $DB_NAME;"
     print_success "Base $DB_NAME créée !"
 fi
 
-if sudo -u postgres psql -c "\du" 2>/dev/null | grep -q "$DB_USER"; then
+if sudo -u postgres psql -p $DB_PORT -c "\du" 2>/dev/null | grep -q "$DB_USER"; then
     print_warning "User $DB_USER existe déjà, on passe..."
 else
-    sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
+    sudo -u postgres psql -p $DB_PORT -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
     print_success "User $DB_USER créé !"
 fi
 
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;"
-sudo -u postgres psql -d $DB_NAME -c "CREATE TABLE IF NOT EXISTS aircraft_position (
+sudo -u postgres psql -p $DB_PORT -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;"
+sudo -u postgres psql -p $DB_PORT -d $DB_NAME -c "CREATE TABLE IF NOT EXISTS aircraft_position (
     id SERIAL PRIMARY KEY,
     callsign VARCHAR(50) UNIQUE,
     latitude FLOAT,
@@ -134,25 +140,25 @@ sudo -u postgres psql -d $DB_NAME -c "CREATE TABLE IF NOT EXISTS aircraft_positi
     heading FLOAT,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );"
-sudo -u postgres psql -d $DB_NAME -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $DB_USER;"
-sudo -u postgres psql -d $DB_NAME -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO $DB_USER;"
+sudo -u postgres psql -p $DB_PORT -d $DB_NAME -c "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $DB_USER;"
+sudo -u postgres psql -p $DB_PORT -d $DB_NAME -c "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO $DB_USER;"
 
-sudo -u postgres psql -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
-sudo -u postgres psql -d $DB_NAME -c "CREATE OR REPLACE VIEW view_live_positions AS
+sudo -u postgres psql -p $DB_PORT -d $DB_NAME -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+sudo -u postgres psql -p $DB_PORT -d $DB_NAME -c "CREATE OR REPLACE VIEW view_live_positions AS
 SELECT 
     id, callsign, latitude, longitude, heading, updated_at,
     ST_SetSRID(ST_MakePoint(longitude, latitude), 4326) AS geom
 FROM aircraft_position;"
-sudo -u postgres psql -d $DB_NAME -c "ALTER VIEW view_live_positions OWNER TO $DB_USER;"
+sudo -u postgres psql -p $DB_PORT -d $DB_NAME -c "ALTER VIEW view_live_positions OWNER TO $DB_USER;"
 
-print_success "PostgreSQL configuré !"
+print_success "PostgreSQL configuré sur le port $DB_PORT !"
 
 # Étape 5 : Pare-feu
 print_info "Étape 5/6 : Configuration du pare-feu..."
 if command -v ufw &> /dev/null; then
     sudo ufw status | grep -q "$FGMS_PORT/udp" || sudo ufw allow $FGMS_PORT/udp
     sudo ufw status | grep -q "$FGMS_TELNET_PORT/tcp" || sudo ufw allow $FGMS_TELNET_PORT/tcp
-    sudo ufw status | grep -q "5432/tcp" || sudo ufw allow 5432/tcp
+    sudo ufw status | grep -q "$DB_PORT/tcp" || sudo ufw allow $DB_PORT/tcp
     sudo ufw status | grep -q "22/tcp" || sudo ufw allow 22/tcp
     sudo ufw --force enable
     print_success "Pare-feu configuré !"
