@@ -16,7 +16,6 @@ def get_positions():
     s = socket.socket()
     s.connect(('127.0.0.1', 5001))
     s.send(b'list\r\n')
-    time.s
     data = s.recv(16384).decode()
     s.close()
     players = []
