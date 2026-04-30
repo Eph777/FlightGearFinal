@@ -123,7 +123,9 @@ else
 fi
 
 if sudo -u postgres psql -c "\du" 2>/dev/null | grep -q "$DB_USER"; then
-    print_warning "User $DB_USER existe déjà, on passe..."
+    print_warning "User $DB_USER existe déjà, mise à jour du mot de passe..."
+    sudo -u postgres psql -c "SET password_encryption = 'scram-sha-256'; ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';"
+    print_success "Mot de passe de $DB_USER mis à jour !"
 else
     sudo -u postgres psql -c "SET password_encryption = 'scram-sha-256'; CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';"
     print_success "User $DB_USER créé !"
