@@ -16,7 +16,7 @@ Follow these simple steps to install everything in one go. You can run this anyw
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/AnthonyRaza/FlightGearFinal.git
+git clone https://github.com/Eph777/FlightGearFinal.git
 cd FlightGearFinal
 
 # 2. Run the installation script
