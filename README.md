@@ -13,7 +13,7 @@ Track player positions from a FlightGear multiplayer server in real time and vis
 ```bash
 
 #1. Clone the repo : 
-git clone https://github.com/AnthonyRaza/FlightGearFinal.git
+git clone https://github.com/Eph777/FlightGearFinal.git
 cd FlightGearTest
 
 # 2. Run the install script
